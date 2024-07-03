@@ -2,14 +2,18 @@ pipeline {
     agent any
     environment {
         PATH = "$PATH:/usr/bin/python3:/usr/bin/pip"
-        // le chemin d'accès doit inclure le chemin où 'python3' et 'pip' sont installés
+        SUDO_PASSWORD = credentials('change')
     }
     stages {
         stage('Build') {
             steps {
                 script {
+                    // Mettre à jour et installer python3-venv en utilisant sudo avec le mot de passe
+                    sh '''
+                    echo $SUDO_PASSWORD | sudo -S apt update
+                    echo $SUDO_PASSWORD | sudo -S apt install -y python3-venv
+                    '''
                     // Créer et activer un environnement virtuel
-                    sh 'sudo apt update && sudo apt install -y python3-venv'
                     sh 'python3 -m venv pythenv'
                     sh '. pythenv/bin/activate && pip install --upgrade pip'
                     // Installer les dépendances
@@ -21,3 +25,4 @@ pipeline {
         }
     }
 }
+
